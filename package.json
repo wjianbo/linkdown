@@ -1,0 +1,40 @@
+{
+  "name": "linkdown",
+  "version": "0.1.0",
+  "description": "Minimal Markdown preprocessing for Zola front matter and wikilinks.",
+  "type": "module",
+  "bin": {
+    "linkdown": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "example-content"
+  ],
+  "scripts": {
+    "build": "node --eval \"import('node:fs').then(({ rmSync }) => rmSync('dist', { recursive: true, force: true }))\" && tsc -p tsconfig.json",
+    "dev": "node --import tsx src/cli.ts",
+    "test": "node --import tsx --test test/*.test.ts"
+  },
+  "keywords": [
+    "markdown",
+    "zola",
+    "wikilinks",
+    "wikilink",
+    "frontmatter",
+    "cli"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^14.0.0",
+    "pinyin": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
