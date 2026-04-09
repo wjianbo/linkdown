@@ -2,7 +2,13 @@ import { readdir, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { parseFrontmatter, updateFrontmatterSlug } from "../core/frontmatter.js";
-import { assertMarkdownFilesExist, getRelativeMarkdownPath, readTextFile, scanMarkdownFiles } from "../core/scanner.js";
+import {
+  assertMarkdownFilesExist,
+  getRelativeMarkdownPath,
+  isIgnoredMarkdownFile,
+  readTextFile,
+  scanMarkdownFiles,
+} from "../core/scanner.js";
 import { isValidSlug, slugifyTitle } from "../core/slug.js";
 
 interface RenamePlanEntry {
@@ -20,7 +26,7 @@ interface RenamePlanEntry {
 
 export async function runRenameCommand(inputDir: string, write: boolean): Promise<void> {
   const root = path.resolve(inputDir);
-  const files = await scanMarkdownFiles(root);
+  const files = (await scanMarkdownFiles(root)).filter((filePath) => !isIgnoredMarkdownFile(filePath));
   await assertMarkdownFilesExist(root, files);
   const occupiedNamesByDir = await getOccupiedNamesByDir(files);
   const reservedTargetsByDir = new Map<string, Set<string>>();
@@ -29,6 +35,7 @@ export async function runRenameCommand(inputDir: string, write: boolean): Promis
   for (const filePath of files) {
     const content = await readTextFile(filePath);
     const relativePath = getRelativeMarkdownPath(root, filePath);
+
     const sourceBasename = path.basename(filePath);
     const currentStem = path.basename(sourceBasename, ".md");
 

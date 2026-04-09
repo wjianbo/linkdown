@@ -11,6 +11,9 @@ export async function scanMarkdownFiles(inputDir) {
     const files = await scanDirectory(root);
     return files.sort((left, right) => left.localeCompare(right));
 }
+export function isIgnoredMarkdownFile(filePath) {
+    return path.basename(filePath).startsWith(IGNORED_FILE_PREFIX);
+}
 export async function assertMarkdownFilesExist(inputDir, files) {
     if (files.length > 0) {
         return;
@@ -34,9 +37,7 @@ async function scanDirectory(currentDir) {
         if (entry.isDirectory()) {
             return scanDirectory(absolutePath);
         }
-        if (entry.isFile() &&
-            entry.name.toLowerCase().endsWith(MARKDOWN_EXTENSION) &&
-            !entry.name.startsWith(IGNORED_FILE_PREFIX)) {
+        if (entry.isFile() && entry.name.toLowerCase().endsWith(MARKDOWN_EXTENSION)) {
             return [absolutePath];
         }
         return [];

@@ -15,6 +15,10 @@ export async function scanMarkdownFiles(inputDir: string): Promise<string[]> {
   return files.sort((left, right) => left.localeCompare(right));
 }
 
+export function isIgnoredMarkdownFile(filePath: string): boolean {
+  return path.basename(filePath).startsWith(IGNORED_FILE_PREFIX);
+}
+
 export async function assertMarkdownFilesExist(inputDir: string, files: string[]): Promise<void> {
   if (files.length > 0) {
     return;
@@ -46,11 +50,7 @@ async function scanDirectory(currentDir: string): Promise<string[]> {
         return scanDirectory(absolutePath);
       }
 
-      if (
-        entry.isFile() &&
-        entry.name.toLowerCase().endsWith(MARKDOWN_EXTENSION) &&
-        !entry.name.startsWith(IGNORED_FILE_PREFIX)
-      ) {
+      if (entry.isFile() && entry.name.toLowerCase().endsWith(MARKDOWN_EXTENSION)) {
         return [absolutePath];
       }
 

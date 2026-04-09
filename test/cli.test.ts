@@ -82,6 +82,32 @@ test("build command reports missing input directories clearly", async () => {
   }
 });
 
+test("build command copies underscore-prefixed markdown files without processing them", async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), "linkdown-"));
+  const inputDir = path.join(tempRoot, "input");
+  const outputDir = path.join(tempRoot, "output");
+  const indexContent = ["# Index", "", "[[运动三定律]]", ""].join("\n");
+
+  try {
+    await mkdirRecursive(path.join(inputDir, "notes"));
+    await writeFile(
+      path.join(inputDir, "notes", "physics-laws.md"),
+      ['---', 'title: "运动三定律"', "---", "", "Body", ""].join("\n"),
+      "utf8",
+    );
+    await writeFile(path.join(inputDir, "notes", "_index.md"), indexContent, "utf8");
+
+    await execFileAsync(process.execPath, ["--import", "tsx", "src/cli.ts", "build", inputDir, "--out", outputDir], {
+      cwd: path.resolve(process.cwd()),
+    });
+
+    const copiedIndex = await readFile(path.join(outputDir, "notes", "_index.md"), "utf8");
+    assert.equal(copiedIndex, indexContent);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
 test("frontmatter command rejects overlapping input and output directories", async () => {
   const tempRoot = await mkdtemp(path.join(os.tmpdir(), "linkdown-"));
   const inputDir = path.join(tempRoot, "content");
@@ -104,6 +130,31 @@ test("frontmatter command rejects overlapping input and output directories", asy
         return true;
       },
     );
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("frontmatter command copies underscore-prefixed markdown files without adding front matter", async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), "linkdown-"));
+  const inputDir = path.join(tempRoot, "content");
+  const outputDir = path.join(tempRoot, "output");
+  const indexContent = ["# Index", "", "Body", ""].join("\n");
+
+  try {
+    await mkdirRecursive(inputDir);
+    await writeFile(path.join(inputDir, "_index.md"), indexContent, "utf8");
+
+    await execFileAsync(
+      process.execPath,
+      ["--import", "tsx", "src/cli.ts", "frontmatter", inputDir, "--out", outputDir],
+      {
+        cwd: path.resolve(process.cwd()),
+      },
+    );
+
+    const copiedIndex = await readFile(path.join(outputDir, "_index.md"), "utf8");
+    assert.equal(copiedIndex, indexContent);
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }

@@ -1,4 +1,4 @@
-import { assertMarkdownFilesExist, assertPathPairIsSafe, readTextFile, scanMarkdownFiles, writeMirroredFile, } from "../core/scanner.js";
+import { assertMarkdownFilesExist, assertPathPairIsSafe, getOutputPath, getRelativeMarkdownPath, isIgnoredMarkdownFile, readTextFile, scanMarkdownFiles, writeMirroredFile, } from "../core/scanner.js";
 import { normalizeMarkdownDocument } from "../core/frontmatter.js";
 export async function runFrontmatterCommand(inputDir, outputDir) {
     assertPathPairIsSafe(inputDir, outputDir);
@@ -6,6 +6,10 @@ export async function runFrontmatterCommand(inputDir, outputDir) {
     await assertMarkdownFilesExist(inputDir, files);
     await Promise.all(files.map(async (filePath) => {
         const content = await readTextFile(filePath);
+        if (isIgnoredMarkdownFile(filePath)) {
+            await writeMirroredFile(getOutputPath(outputDir, getRelativeMarkdownPath(inputDir, filePath)), content);
+            return;
+        }
         const document = normalizeMarkdownDocument({
             content,
             inputRoot: inputDir,

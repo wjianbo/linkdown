@@ -1,6 +1,9 @@
 import {
   assertMarkdownFilesExist,
   assertPathPairIsSafe,
+  getOutputPath,
+  getRelativeMarkdownPath,
+  isIgnoredMarkdownFile,
   readTextFile,
   scanMarkdownFiles,
   writeMirroredFile,
@@ -15,6 +18,12 @@ export async function runFrontmatterCommand(inputDir: string, outputDir: string)
   await Promise.all(
     files.map(async (filePath) => {
       const content = await readTextFile(filePath);
+
+      if (isIgnoredMarkdownFile(filePath)) {
+        await writeMirroredFile(getOutputPath(outputDir, getRelativeMarkdownPath(inputDir, filePath)), content);
+        return;
+      }
+
       const document = normalizeMarkdownDocument({
         content,
         inputRoot: inputDir,

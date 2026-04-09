@@ -2,13 +2,15 @@ import path from "node:path";
 import { BacklinksCollector } from "../core/backlinks.js";
 import { normalizeMarkdownDocument } from "../core/frontmatter.js";
 import { createLinkIndex } from "../core/resolver.js";
-import { assertMarkdownFilesExist, assertPathPairIsSafe, readTextFile, scanMarkdownFiles, writeMirroredFile, } from "../core/scanner.js";
+import { assertMarkdownFilesExist, assertPathPairIsSafe, getOutputPath, getRelativeMarkdownPath, isIgnoredMarkdownFile, readTextFile, scanMarkdownFiles, writeMirroredFile, } from "../core/scanner.js";
 import { replaceWikilinks } from "../core/wikilink.js";
 export async function runBuildCommand(inputDir, outputDir) {
     assertPathPairIsSafe(inputDir, outputDir);
     const files = await scanMarkdownFiles(inputDir);
     await assertMarkdownFilesExist(inputDir, files);
-    const documents = await Promise.all(files.map(async (filePath) => {
+    const passthroughFiles = files.filter((filePath) => isIgnoredMarkdownFile(filePath));
+    const processableFiles = files.filter((filePath) => !isIgnoredMarkdownFile(filePath));
+    const documents = await Promise.all(processableFiles.map(async (filePath) => {
         const content = await readTextFile(filePath);
         return normalizeMarkdownDocument({
             content,
@@ -40,6 +42,10 @@ export async function runBuildCommand(inputDir, outputDir) {
             return wikilink.raw;
         });
         await writeMirroredFile(document.outputPath, transformedContent);
+    }));
+    await Promise.all(passthroughFiles.map(async (filePath) => {
+        const content = await readTextFile(filePath);
+        await writeMirroredFile(getOutputPath(outputDir, getRelativeMarkdownPath(inputDir, filePath)), content);
     }));
     reports.backlinks = backlinks.toJSON();
     await Promise.all([

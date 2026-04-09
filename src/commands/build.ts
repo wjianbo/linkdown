@@ -6,6 +6,9 @@ import { createLinkIndex } from "../core/resolver.js";
 import {
   assertMarkdownFilesExist,
   assertPathPairIsSafe,
+  getOutputPath,
+  getRelativeMarkdownPath,
+  isIgnoredMarkdownFile,
   readTextFile,
   scanMarkdownFiles,
   writeMirroredFile,
@@ -17,8 +20,10 @@ export async function runBuildCommand(inputDir: string, outputDir: string): Prom
   assertPathPairIsSafe(inputDir, outputDir);
   const files = await scanMarkdownFiles(inputDir);
   await assertMarkdownFilesExist(inputDir, files);
+  const passthroughFiles = files.filter((filePath) => isIgnoredMarkdownFile(filePath));
+  const processableFiles = files.filter((filePath) => !isIgnoredMarkdownFile(filePath));
   const documents = await Promise.all(
-    files.map(async (filePath) => {
+    processableFiles.map(async (filePath) => {
       const content = await readTextFile(filePath);
       return normalizeMarkdownDocument({
         content,
@@ -57,6 +62,13 @@ export async function runBuildCommand(inputDir: string, outputDir: string): Prom
       });
 
       await writeMirroredFile(document.outputPath, transformedContent);
+    }),
+  );
+
+  await Promise.all(
+    passthroughFiles.map(async (filePath) => {
+      const content = await readTextFile(filePath);
+      await writeMirroredFile(getOutputPath(outputDir, getRelativeMarkdownPath(inputDir, filePath)), content);
     }),
   );
 
