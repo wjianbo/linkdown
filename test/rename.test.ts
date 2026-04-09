@@ -95,6 +95,29 @@ test("rename --write renames files, preserves existing slugs, and skips valid sl
   }
 });
 
+test("rename ignores markdown files whose names start with an underscore", async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), "linkdown-"));
+  const inputDir = path.join(tempRoot, "input");
+  const ignoredPath = path.join(inputDir, "notes", "_index.md");
+  const sourcePath = path.join(inputDir, "notes", "A Perfect Day.md");
+
+  try {
+    await mkdirRecursive(path.dirname(sourcePath));
+    await writeFile(ignoredPath, ['---', 'title: "Notes Index"', "---", "", "Body", ""].join("\n"), "utf8");
+    await writeFile(sourcePath, ['---', 'title: "A Perfect Day"', "---", "", "Body", ""].join("\n"), "utf8");
+
+    const result = await execFileAsync(process.execPath, ["--import", "tsx", "src/cli.ts", "rename", inputDir], {
+      cwd: path.resolve(process.cwd()),
+    });
+
+    assert.match(result.stdout, /notes\/A Perfect Day\.md -> notes\/a-perfect-day\.md/);
+    assert.doesNotMatch(result.stdout, /_index\.md/);
+    assert.equal(await readFile(ignoredPath, "utf8"), ['---', 'title: "Notes Index"', "---", "", "Body", ""].join("\n"));
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
 async function mkdirRecursive(targetDir: string): Promise<void> {
   const { mkdir } = await import("node:fs/promises");
   await mkdir(targetDir, { recursive: true });

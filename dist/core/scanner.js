@@ -1,6 +1,7 @@
 import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 const MARKDOWN_EXTENSION = ".md";
+const IGNORED_FILE_PREFIX = "_";
 export function toUnixPath(value) {
     return value.split(path.sep).join("/");
 }
@@ -33,7 +34,9 @@ async function scanDirectory(currentDir) {
         if (entry.isDirectory()) {
             return scanDirectory(absolutePath);
         }
-        if (entry.isFile() && entry.name.toLowerCase().endsWith(MARKDOWN_EXTENSION)) {
+        if (entry.isFile() &&
+            entry.name.toLowerCase().endsWith(MARKDOWN_EXTENSION) &&
+            !entry.name.startsWith(IGNORED_FILE_PREFIX)) {
             return [absolutePath];
         }
         return [];
