@@ -7,7 +7,7 @@ It does three things:
 - ensures each Markdown file has front matter
 - converts `[[wikilinks]]` into Zola `@/path/to/file.md` links
 - renames files from front matter titles when you want slug-based filenames
-- leaves underscore-prefixed Markdown files unchanged
+- ignores underscore-prefixed files only during `rename`
 
 ## What
 
@@ -68,7 +68,7 @@ npm install -g linkdown
 - Title and alias based wikilink resolution
 - Dry-run rename workflow
 - Slug generation for non-Latin titles through `pinyin`
-- Underscore-prefixed Markdown files such as `_index.md` are copied through unchanged by `build` and `frontmatter`, and ignored by `rename`
+- Underscore-prefixed Markdown files such as `_index.md` are processed by `build`, copied through unchanged by `frontmatter`, and ignored by `rename`
 
 Supported wikilinks:
 
@@ -118,11 +118,10 @@ linkdown build content --out build/output
 Behavior:
 
 1. Scan Markdown files under `<inputDir>`.
-2. Copy Markdown files whose names start with `_`, such as `_index.md`, to `<outputDir>` unchanged.
-3. Ensure front matter exists for the remaining Markdown files.
-4. Build a lookup from `title` and `aliases`.
-5. Convert supported wikilinks to Zola `@/` links.
-6. Write transformed Markdown and JSON reports to `<outputDir>`.
+2. Ensure front matter exists.
+3. Build a lookup from `title` and `aliases`.
+4. Convert supported wikilinks to Zola `@/` links.
+5. Write transformed Markdown and JSON reports to `<outputDir>`.
 
 Example:
 

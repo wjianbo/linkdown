@@ -82,7 +82,7 @@ test("build command reports missing input directories clearly", async () => {
   }
 });
 
-test("build command copies underscore-prefixed markdown files without processing them", async () => {
+test("build command processes underscore-prefixed markdown files", async () => {
   const tempRoot = await mkdtemp(path.join(os.tmpdir(), "linkdown-"));
   const inputDir = path.join(tempRoot, "input");
   const outputDir = path.join(tempRoot, "output");
@@ -101,8 +101,9 @@ test("build command copies underscore-prefixed markdown files without processing
       cwd: path.resolve(process.cwd()),
     });
 
-    const copiedIndex = await readFile(path.join(outputDir, "notes", "_index.md"), "utf8");
-    assert.equal(copiedIndex, indexContent);
+    const builtIndex = await readFile(path.join(outputDir, "notes", "_index.md"), "utf8");
+    assert.match(builtIndex, /^---\ntitle: "Index"\n---/);
+    assert.match(builtIndex, /\[运动三定律\]\(@\/notes\/physics-laws\.md\)/);
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
