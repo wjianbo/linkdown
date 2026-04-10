@@ -23,6 +23,7 @@ export function normalizeMarkdownDocument(args: {
   inputRoot: string;
   outputRoot: string;
   sourcePath: string;
+  ensureFrontmatter?: boolean;
 }): NormalizedDocument {
   const relativePath = getRelativeMarkdownPath(args.inputRoot, args.sourcePath);
   const outputPath = getOutputPath(args.outputRoot, relativePath);
@@ -30,7 +31,7 @@ export function normalizeMarkdownDocument(args: {
   const fallbackTitle = extractFallbackTitle(frontmatterSection.body, args.sourcePath);
   const title = frontmatterSection.data.title ?? fallbackTitle;
   const aliases = frontmatterSection.data.aliases;
-  const normalizedContent = frontmatterSection.hadFrontmatter
+  const normalizedContent = frontmatterSection.hadFrontmatter || args.ensureFrontmatter === false
     ? args.content
     : createFrontmatter(title, frontmatterSection.body);
 

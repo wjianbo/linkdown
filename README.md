@@ -68,7 +68,7 @@ npm install -g linkdown
 - Title and alias based wikilink resolution
 - Dry-run rename workflow
 - Slug generation for non-Latin titles through `pinyin`
-- Underscore-prefixed Markdown files such as `_index.md` are processed by `build`, copied through unchanged by `frontmatter`, and ignored by `rename`
+- Underscore-prefixed Markdown files such as `_index.md` have wikilinks resolved by `build` without adding front matter, are copied through unchanged by `frontmatter`, and are ignored by `rename`
 
 Supported wikilinks:
 

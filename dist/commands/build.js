@@ -2,7 +2,7 @@ import path from "node:path";
 import { BacklinksCollector } from "../core/backlinks.js";
 import { normalizeMarkdownDocument } from "../core/frontmatter.js";
 import { createLinkIndex } from "../core/resolver.js";
-import { assertMarkdownFilesExist, assertPathPairIsSafe, readTextFile, scanMarkdownFiles, writeMirroredFile, } from "../core/scanner.js";
+import { assertMarkdownFilesExist, assertPathPairIsSafe, isIgnoredMarkdownFile, readTextFile, scanMarkdownFiles, writeMirroredFile, } from "../core/scanner.js";
 import { replaceWikilinks } from "../core/wikilink.js";
 export async function runBuildCommand(inputDir, outputDir) {
     assertPathPairIsSafe(inputDir, outputDir);
@@ -15,6 +15,7 @@ export async function runBuildCommand(inputDir, outputDir) {
             inputRoot: inputDir,
             outputRoot: outputDir,
             sourcePath: filePath,
+            ensureFrontmatter: !isIgnoredMarkdownFile(filePath),
         });
     }));
     const reports = {

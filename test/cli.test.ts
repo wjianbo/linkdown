@@ -102,7 +102,7 @@ test("build command processes underscore-prefixed markdown files", async () => {
     });
 
     const builtIndex = await readFile(path.join(outputDir, "notes", "_index.md"), "utf8");
-    assert.match(builtIndex, /^---\ntitle: "Index"\n---/);
+    assert.doesNotMatch(builtIndex, /^---\n/);
     assert.match(builtIndex, /\[运动三定律\]\(@\/notes\/physics-laws\.md\)/);
   } finally {
     await rm(tempRoot, { recursive: true, force: true });

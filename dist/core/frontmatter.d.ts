@@ -10,6 +10,7 @@ export declare function normalizeMarkdownDocument(args: {
     inputRoot: string;
     outputRoot: string;
     sourcePath: string;
+    ensureFrontmatter?: boolean;
 }): NormalizedDocument;
 export declare function parseFrontmatter(content: string): FrontmatterSection;
 export declare function updateFrontmatterSlug(content: string, slug: string): string;

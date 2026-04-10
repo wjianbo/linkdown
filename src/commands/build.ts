@@ -6,6 +6,7 @@ import { createLinkIndex } from "../core/resolver.js";
 import {
   assertMarkdownFilesExist,
   assertPathPairIsSafe,
+  isIgnoredMarkdownFile,
   readTextFile,
   scanMarkdownFiles,
   writeMirroredFile,
@@ -25,6 +26,7 @@ export async function runBuildCommand(inputDir: string, outputDir: string): Prom
         inputRoot: inputDir,
         outputRoot: outputDir,
         sourcePath: filePath,
+        ensureFrontmatter: !isIgnoredMarkdownFile(filePath),
       });
     }),
   );
