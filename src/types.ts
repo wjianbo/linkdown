@@ -1,6 +1,7 @@
 export interface FrontmatterData {
   title?: string;
   slug?: string;
+  date?: string;
   aliases: string[];
 }
 

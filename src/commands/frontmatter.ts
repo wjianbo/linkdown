@@ -8,7 +8,7 @@ import {
   scanMarkdownFiles,
   writeMirroredFile,
 } from "../core/scanner.js";
-import { normalizeMarkdownDocument } from "../core/frontmatter.js";
+import { normalizeMarkdownDocument, resolveFrontmatterDate } from "../core/frontmatter.js";
 
 export async function runFrontmatterCommand(inputDir: string, outputDir: string): Promise<void> {
   assertPathPairIsSafe(inputDir, outputDir);
@@ -24,11 +24,13 @@ export async function runFrontmatterCommand(inputDir: string, outputDir: string)
         return;
       }
 
+      const frontmatterDate = await resolveFrontmatterDate({ content, sourcePath: filePath });
       const document = normalizeMarkdownDocument({
         content,
         inputRoot: inputDir,
         outputRoot: outputDir,
         sourcePath: filePath,
+        frontmatterDate,
       });
 
       await writeMirroredFile(document.outputPath, document.content);

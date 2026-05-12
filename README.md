@@ -118,7 +118,7 @@ linkdown build content --out build/output
 Behavior:
 
 1. Scan Markdown files under `<inputDir>`.
-2. Ensure front matter exists.
+2. Ensure front matter exists, including a generated date when one is missing.
 3. Build a lookup from `title` and `aliases`.
 4. Convert supported wikilinks to Zola `@/` links.
 5. Write transformed Markdown and JSON reports to `<outputDir>`.
@@ -149,11 +149,21 @@ Title priority:
 2. first Markdown H1
 3. filename without extension
 
+Date priority:
+
+1. existing front matter `date`
+2. date extracted from the filename: `2026-05-12.md`, `2026.05.12.md`, `20260512.md`, or `2026_05_12.md`
+3. git first commit author date
+4. filesystem creation time
+
+Existing front matter dates are never overwritten. Generated dates are written as `date: YYYY-MM-DD`.
+
 If front matter is missing, `linkdown` writes:
 
 ```yaml
 ---
 title: "Example"
+date: 2026-05-12
 ---
 ```
 

@@ -1,7 +1,7 @@
 import path from "node:path";
 
 import { BacklinksCollector } from "../core/backlinks.js";
-import { normalizeMarkdownDocument } from "../core/frontmatter.js";
+import { normalizeMarkdownDocument, resolveFrontmatterDate } from "../core/frontmatter.js";
 import { createLinkIndex } from "../core/resolver.js";
 import {
   assertMarkdownFilesExist,
@@ -21,12 +21,18 @@ export async function runBuildCommand(inputDir: string, outputDir: string): Prom
   const documents = await Promise.all(
     files.map(async (filePath) => {
       const content = await readTextFile(filePath);
+      const ensureFrontmatter = !isIgnoredMarkdownFile(filePath);
+      const frontmatterDate = ensureFrontmatter
+        ? await resolveFrontmatterDate({ content, sourcePath: filePath })
+        : undefined;
+
       return normalizeMarkdownDocument({
         content,
         inputRoot: inputDir,
         outputRoot: outputDir,
         sourcePath: filePath,
-        ensureFrontmatter: !isIgnoredMarkdownFile(filePath),
+        ensureFrontmatter,
+        frontmatterDate,
       });
     }),
   );

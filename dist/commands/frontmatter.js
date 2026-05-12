@@ -1,5 +1,5 @@
 import { assertMarkdownFilesExist, assertPathPairIsSafe, getOutputPath, getRelativeMarkdownPath, isIgnoredMarkdownFile, readTextFile, scanMarkdownFiles, writeMirroredFile, } from "../core/scanner.js";
-import { normalizeMarkdownDocument } from "../core/frontmatter.js";
+import { normalizeMarkdownDocument, resolveFrontmatterDate } from "../core/frontmatter.js";
 export async function runFrontmatterCommand(inputDir, outputDir) {
     assertPathPairIsSafe(inputDir, outputDir);
     const files = await scanMarkdownFiles(inputDir);
@@ -10,11 +10,13 @@ export async function runFrontmatterCommand(inputDir, outputDir) {
             await writeMirroredFile(getOutputPath(outputDir, getRelativeMarkdownPath(inputDir, filePath)), content);
             return;
         }
+        const frontmatterDate = await resolveFrontmatterDate({ content, sourcePath: filePath });
         const document = normalizeMarkdownDocument({
             content,
             inputRoot: inputDir,
             outputRoot: outputDir,
             sourcePath: filePath,
+            frontmatterDate,
         });
         await writeMirroredFile(document.outputPath, document.content);
     }));

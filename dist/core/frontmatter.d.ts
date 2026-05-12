@@ -4,6 +4,7 @@ interface FrontmatterSection {
     body: string;
     raw?: string;
     hadFrontmatter: boolean;
+    hasDate: boolean;
 }
 export declare function normalizeMarkdownDocument(args: {
     content: string;
@@ -11,7 +12,12 @@ export declare function normalizeMarkdownDocument(args: {
     outputRoot: string;
     sourcePath: string;
     ensureFrontmatter?: boolean;
+    frontmatterDate?: string | undefined;
 }): NormalizedDocument;
+export declare function resolveFrontmatterDate(args: {
+    content: string;
+    sourcePath: string;
+}): Promise<string | undefined>;
 export declare function parseFrontmatter(content: string): FrontmatterSection;
 export declare function updateFrontmatterSlug(content: string, slug: string): string;
 export {};
